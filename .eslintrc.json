@@ -23,6 +23,7 @@
         "prettier"
     ],
     "rules": {
+      "@typescript-eslint/no-explicit-any": "off",
       "class-methods-use-this": "off",
       "import/extensions": [
         "error",

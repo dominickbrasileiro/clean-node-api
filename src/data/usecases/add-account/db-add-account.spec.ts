@@ -1,10 +1,10 @@
-import { Encrypter } from './db-add-account-protocols';
+import {
+  Encrypter,
+  AddAccountModel,
+  AccountModel,
+  AddAccountRepository,
+} from './db-add-account-protocols';
 import { DbAddAccount } from './db-add-account';
-
-interface SutTypes {
-  sut: DbAddAccount;
-  encrypterStub: Encrypter;
-}
 
 const makeEncrypter = (): Encrypter => {
   class EncrypterStub {
@@ -18,12 +18,38 @@ const makeEncrypter = (): Encrypter => {
   return encrypterStub;
 };
 
+const makeAddAccountRepository = (): AddAccountRepository => {
+  class AddAccountRepositoryStub {
+    async add(_: AddAccountModel): Promise<AccountModel> {
+      const fakeAccount = {
+        id: 'valid_id',
+        name: 'valid_name',
+        email: 'valid_email@example.com',
+        password: 'hashed_password',
+      };
+
+      return fakeAccount;
+    }
+  }
+
+  const addAccountRepositoryStub = new AddAccountRepositoryStub();
+
+  return addAccountRepositoryStub;
+};
+interface SutTypes {
+  sut: DbAddAccount;
+  encrypterStub: Encrypter;
+  addAccountRepositoryStub: AddAccountRepository;
+}
+
 const makeSut = (): SutTypes => {
   const encrypterStub = makeEncrypter();
 
-  const sut = new DbAddAccount(encrypterStub);
+  const addAccountRepositoryStub = makeAddAccountRepository();
 
-  return { sut, encrypterStub };
+  const sut = new DbAddAccount(encrypterStub, addAccountRepositoryStub);
+
+  return { sut, encrypterStub, addAccountRepositoryStub };
 };
 
 describe('DbAddAccount Usecase', () => {
@@ -59,5 +85,25 @@ describe('DbAddAccount Usecase', () => {
     };
 
     await expect(sut.add(accountData)).rejects.toThrow();
+  });
+
+  it('should call AddAccountRepository with provided values', async () => {
+    const { sut, addAccountRepositoryStub } = makeSut();
+
+    const addSpy = jest.spyOn(addAccountRepositoryStub, 'add');
+
+    const accountData = {
+      name: 'valid_name',
+      email: 'valid_email@example.com',
+      password: 'valid_password',
+    };
+
+    await sut.add(accountData);
+
+    expect(addSpy).toHaveBeenCalledWith({
+      name: 'valid_name',
+      email: 'valid_email@example.com',
+      password: 'hashed_password',
+    });
   });
 });

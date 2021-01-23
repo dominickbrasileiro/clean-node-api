@@ -9,6 +9,6 @@ export class BcryptAdapter implements Encrypter {
   }
 
   async encrypt(value: string): Promise<string> {
-    return bcrypt.hash(value, 12);
+    return bcrypt.hash(value, this.salt);
   }
 }

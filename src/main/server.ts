@@ -1,6 +1,13 @@
 /* eslint-disable no-console */
-import { app } from './config/app';
+import { MongoHelper } from '../infra/database/mongodb/helpers/mongo-helper';
+import env from './config/env';
 
-app.listen(3333, () => {
-  console.log('Server running at http://localhost:3333');
-});
+(async () => {
+  await MongoHelper.connect(env.mongoUrl);
+
+  const { app } = await import('./config/app');
+
+  app.listen(env.port, () => {
+    console.log(`Server running at http://localhost:${env.port}`);
+  });
+})();

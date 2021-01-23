@@ -40,6 +40,12 @@
         "ts": "never"
       }
     ],
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": ["**/*.test.ts", "**/*.spec.ts"]
+      }
+    ],
     "import/prefer-default-export": "off",
     "max-classes-per-file": "off",
     "no-console": [

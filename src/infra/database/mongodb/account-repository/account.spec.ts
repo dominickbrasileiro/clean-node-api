@@ -11,7 +11,7 @@ describe('Account Mongo Repository', () => {
   });
 
   beforeEach(async () => {
-    const accountCollection = await MongoHelper.getColletion('accounts');
+    const accountCollection = await MongoHelper.Collection('accounts');
 
     await accountCollection.deleteMany({});
   });

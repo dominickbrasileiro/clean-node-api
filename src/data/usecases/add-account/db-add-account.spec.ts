@@ -6,6 +6,19 @@ import {
 } from './db-add-account-protocols';
 import { DbAddAccount } from './db-add-account';
 
+const makeFakeAccountData = (): AddAccountModel => ({
+  name: 'valid_name',
+  email: 'valid_email@example.com',
+  password: 'valid_password',
+});
+
+const makeFakeAccount = (): AccountModel => ({
+  id: 'valid_id',
+  name: 'valid_name',
+  email: 'valid_email@example.com',
+  password: 'hashed_password',
+});
+
 const makeEncrypter = (): Encrypter => {
   class EncrypterStub {
     async encrypt(_: string): Promise<string> {
@@ -21,12 +34,7 @@ const makeEncrypter = (): Encrypter => {
 const makeAddAccountRepository = (): AddAccountRepository => {
   class AddAccountRepositoryStub {
     async add(_: AddAccountModel): Promise<AccountModel> {
-      const fakeAccount = {
-        id: 'valid_id',
-        name: 'valid_name',
-        email: 'valid_email@example.com',
-        password: 'hashed_password',
-      };
+      const fakeAccount = makeFakeAccount();
 
       return fakeAccount;
     }
@@ -58,11 +66,7 @@ describe('DbAddAccount Usecase', () => {
 
     const encryptSpy = jest.spyOn(encrypterStub, 'encrypt');
 
-    const accountData = {
-      name: 'valid_name',
-      email: 'valid_email@example.com',
-      password: 'valid_password',
-    };
+    const accountData = makeFakeAccountData();
 
     await sut.add(accountData);
 
@@ -78,11 +82,7 @@ describe('DbAddAccount Usecase', () => {
         new Promise((resolve, reject) => reject(new Error())),
       );
 
-    const accountData = {
-      name: 'valid_name',
-      email: 'valid_email@example.com',
-      password: 'valid_password',
-    };
+    const accountData = makeFakeAccountData();
 
     await expect(sut.add(accountData)).rejects.toThrow();
   });
@@ -92,11 +92,7 @@ describe('DbAddAccount Usecase', () => {
 
     const addSpy = jest.spyOn(addAccountRepositoryStub, 'add');
 
-    const accountData = {
-      name: 'valid_name',
-      email: 'valid_email@example.com',
-      password: 'valid_password',
-    };
+    const accountData = makeFakeAccountData();
 
     await sut.add(accountData);
 
@@ -116,11 +112,7 @@ describe('DbAddAccount Usecase', () => {
         new Promise((resolve, reject) => reject(new Error())),
       );
 
-    const accountData = {
-      name: 'valid_name',
-      email: 'valid_email@example.com',
-      password: 'valid_password',
-    };
+    const accountData = makeFakeAccountData();
 
     await expect(sut.add(accountData)).rejects.toThrow();
   });
@@ -128,19 +120,10 @@ describe('DbAddAccount Usecase', () => {
   it('should return an account on success', async () => {
     const { sut } = makeSut();
 
-    const accountData = {
-      name: 'valid_name',
-      email: 'valid_email@example.com',
-      password: 'valid_password',
-    };
+    const accountData = makeFakeAccountData();
 
     const account = await sut.add(accountData);
 
-    expect(account).toEqual({
-      id: 'valid_id',
-      name: 'valid_name',
-      email: 'valid_email@example.com',
-      password: 'hashed_password',
-    });
+    expect(account).toEqual(makeFakeAccount());
   });
 });

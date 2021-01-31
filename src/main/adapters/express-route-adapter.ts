@@ -11,6 +11,12 @@ export const adaptRoute = (controller: Controller) => {
 
     const { statusCode, body } = httpResponse;
 
+    if (body.message) {
+      return res.status(statusCode).json({
+        message: body.message,
+      });
+    }
+
     return res.status(statusCode).json(body);
   };
 };

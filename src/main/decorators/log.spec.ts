@@ -1,3 +1,5 @@
+import { LogErrorRepository } from '../../data/protocols/log-error-repository';
+import { serverError } from '../../presentation/helpers/http-helper';
 import {
   Controller,
   HttpRequest,
@@ -5,10 +7,14 @@ import {
 } from '../../presentation/protocols';
 import { LogControllerDecorator } from './log';
 
-interface SutTypes {
-  sut: LogControllerDecorator;
-  controllerStub: Controller;
-}
+const makeLogErrorRepository = (): LogErrorRepository => {
+  class LogErrorRepositoryStub implements LogErrorRepository {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    async log(_: string): Promise<void> {}
+  }
+
+  return new LogErrorRepositoryStub();
+};
 
 const makeController = (): Controller => {
   class ControllerStub implements Controller {
@@ -27,12 +33,22 @@ const makeController = (): Controller => {
   return new ControllerStub();
 };
 
+interface SutTypes {
+  sut: LogControllerDecorator;
+  controllerStub: Controller;
+  logErrorRepositoryStub: LogErrorRepository;
+}
+
 const makeSut = (): SutTypes => {
   const controllerStub = makeController();
+  const logErrorRepositoryStub = makeLogErrorRepository();
 
-  const sut = new LogControllerDecorator(controllerStub);
+  const sut = new LogControllerDecorator(
+    controllerStub,
+    logErrorRepositoryStub,
+  );
 
-  return { sut, controllerStub };
+  return { sut, controllerStub, logErrorRepositoryStub };
 };
 
 describe('LogController Decorator', () => {
@@ -75,5 +91,30 @@ describe('LogController Decorator', () => {
         ok: true,
       },
     });
+  });
+
+  it('should call LogErrorRepository with correct error if controller returns a server error', async () => {
+    const { sut, controllerStub, logErrorRepositoryStub } = makeSut();
+
+    const error = new Error();
+
+    jest.spyOn(controllerStub, 'handle').mockImplementationOnce(async () => {
+      return serverError(error);
+    });
+
+    const logSpy = jest.spyOn(logErrorRepositoryStub, 'log');
+
+    const httpRequest: HttpRequest = {
+      body: {
+        email: 'any_email@example.com',
+        name: 'any_name',
+        password: 'any_password',
+        confirm_password: 'any_password',
+      },
+    };
+
+    await sut.handle(httpRequest);
+
+    expect(logSpy).toHaveBeenLastCalledWith(error.stack);
   });
 });

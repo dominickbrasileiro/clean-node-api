@@ -23,7 +23,7 @@ const makeFakeSuccess = () => ({
 const makeLogErrorRepository = (): LogErrorRepository => {
   class LogErrorRepositoryStub implements LogErrorRepository {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    async log(_: string): Promise<void> {}
+    async logError(_: string): Promise<void> {}
   }
 
   return new LogErrorRepositoryStub();
@@ -91,7 +91,7 @@ describe('LogController Decorator', () => {
       return serverError(error);
     });
 
-    const logSpy = jest.spyOn(logErrorRepositoryStub, 'log');
+    const logSpy = jest.spyOn(logErrorRepositoryStub, 'logError');
 
     const httpRequest = makeFakeHttpRequest();
 

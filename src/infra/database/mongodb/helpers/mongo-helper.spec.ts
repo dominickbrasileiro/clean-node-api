@@ -10,12 +10,12 @@ describe('Mongo Helper', () => {
   });
 
   it('should reconnect if client is down', async () => {
-    let accountColletion = await sut.Collection('accounts');
+    let accountColletion = await sut.getCollection('accounts');
     expect(accountColletion).toBeTruthy();
 
     await sut.disconnect();
 
-    accountColletion = await sut.Collection('accounts');
+    accountColletion = await sut.getCollection('accounts');
     expect(accountColletion).toBeTruthy();
   });
 });

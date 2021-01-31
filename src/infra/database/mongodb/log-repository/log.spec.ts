@@ -18,7 +18,7 @@ describe('Log Mongo Repository', async () => {
   });
 
   beforeEach(async () => {
-    errorCollection = await MongoHelper.Collection('errors');
+    errorCollection = await MongoHelper.getCollection('errors');
 
     await errorCollection.deleteMany({});
   });
@@ -27,7 +27,7 @@ describe('Log Mongo Repository', async () => {
     const sut = makeSut();
     await sut.logError('any_error');
 
-    errorCollection = await MongoHelper.Collection('errors');
+    errorCollection = await MongoHelper.getCollection('errors');
 
     const count = await errorCollection.countDocuments();
 

@@ -9,8 +9,8 @@ import {
   AddAccount,
   AddAccountModel,
   AccountModel,
+  HttpRequest,
 } from './signup-protocols';
-import { HttpRequest } from '../../protocols';
 import { badRequest, serverError, ok } from '../../helpers/http-helper';
 
 const makeFakeAccount = (): AccountModel => ({

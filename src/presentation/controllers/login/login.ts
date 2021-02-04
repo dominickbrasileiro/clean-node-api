@@ -8,6 +8,7 @@ import {
 } from './login-protocols';
 import {
   badRequest,
+  ok,
   serverError,
   unauthorized,
 } from '../../helpers/http-helper';
@@ -47,7 +48,7 @@ export class LoginController implements Controller {
         return unauthorized();
       }
 
-      return null;
+      return ok({ accessToken });
     } catch (error) {
       return serverError(error);
     }

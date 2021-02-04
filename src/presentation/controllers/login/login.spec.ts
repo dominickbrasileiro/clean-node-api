@@ -1,7 +1,14 @@
 import { InvalidParamError, MissingParamError } from '../../errors';
 import { badRequest } from '../../helpers/http-helper';
-import { EmailValidator } from '../signup/signup-protocols';
+import { EmailValidator, HttpRequest } from '../signup/signup-protocols';
 import { LoginController } from './login';
+
+const makeFakeHttpRequest = (): HttpRequest => ({
+  body: {
+    email: 'any_email@example.com',
+    password: 'any_password',
+  },
+});
 
 const makeEmailValidator = (): EmailValidator => {
   class EmailValidatorStub implements EmailValidator {
@@ -54,37 +61,27 @@ describe('Login Controller', () => {
     expect(httpResponse).toEqual(badRequest(new MissingParamError('password')));
   });
 
-  it('should call EmailValidator with provided e-mail', async () => {
-    const { sut, emailValidatorStub } = makeSut();
-
-    const isValidSpy = jest.spyOn(emailValidatorStub, 'isValid');
-
-    const httpRequest = {
-      body: {
-        email: 'any_email@example.com',
-        password: 'any_password',
-      },
-    };
-
-    await sut.handle(httpRequest);
-
-    expect(isValidSpy).toHaveBeenCalledWith('any_email@example.com');
-  });
-
   it('should return 400 if an invalid e-mail is provided', async () => {
     const { sut, emailValidatorStub } = makeSut();
 
     jest.spyOn(emailValidatorStub, 'isValid').mockReturnValueOnce(false);
 
-    const httpRequest = {
-      body: {
-        email: 'invalid_emailm',
-        password: 'any_password',
-      },
-    };
+    const httpRequest = makeFakeHttpRequest();
 
     const httpResponse = await sut.handle(httpRequest);
 
     expect(httpResponse).toEqual(badRequest(new InvalidParamError('email')));
+  });
+
+  it('should call EmailValidator with provided e-mail', async () => {
+    const { sut, emailValidatorStub } = makeSut();
+
+    const isValidSpy = jest.spyOn(emailValidatorStub, 'isValid');
+
+    const httpRequest = makeFakeHttpRequest();
+
+    await sut.handle(httpRequest);
+
+    expect(isValidSpy).toHaveBeenCalledWith('any_email@example.com');
   });
 });

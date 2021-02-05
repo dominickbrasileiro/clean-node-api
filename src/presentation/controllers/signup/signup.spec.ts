@@ -88,51 +88,6 @@ const makeSut = (): SutTypes => {
 };
 
 describe('SignUp Controller', () => {
-  it('should return 400 if no name is provided', async () => {
-    const { sut } = makeSut();
-
-    const httpRequest = {
-      body: {
-        email: 'any_email@example.com',
-        password: 'any_password',
-        confirm_password: 'any_password',
-      },
-    };
-
-    const httpResponse = await sut.handle(httpRequest);
-    expect(httpResponse).toEqual(badRequest(new MissingParamError('name')));
-  });
-
-  it('should return 400 if no email is provided', async () => {
-    const { sut } = makeSut();
-
-    const httpRequest = {
-      body: {
-        name: 'any_name',
-        password: 'any_password',
-        confirm_password: 'any_password',
-      },
-    };
-
-    const httpResponse = await sut.handle(httpRequest);
-    expect(httpResponse).toEqual(badRequest(new MissingParamError('email')));
-  });
-
-  it('should return 400 if no password is provided', async () => {
-    const { sut } = makeSut();
-
-    const httpRequest = {
-      body: {
-        name: 'any_name',
-        email: 'any_email@example.com',
-        confirm_password: 'any_password',
-      },
-    };
-
-    const httpResponse = await sut.handle(httpRequest);
-    expect(httpResponse).toEqual(badRequest(new MissingParamError('password')));
-  });
-
   it('should return 400 if password confirmation fails', async () => {
     const { sut } = makeSut();
 
@@ -148,23 +103,6 @@ describe('SignUp Controller', () => {
     const httpResponse = await sut.handle(httpRequest);
     expect(httpResponse).toEqual(
       badRequest(new InvalidParamError('confirm_password')),
-    );
-  });
-
-  it('should return 400 if no password confirmation is provided', async () => {
-    const { sut } = makeSut();
-
-    const httpRequest = {
-      body: {
-        name: 'any_name',
-        email: 'any_email@example.com',
-        password: 'any_password',
-      },
-    };
-
-    const httpResponse = await sut.handle(httpRequest);
-    expect(httpResponse).toEqual(
-      badRequest(new MissingParamError('confirm_password')),
     );
   });
 

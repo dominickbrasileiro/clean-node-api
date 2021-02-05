@@ -54,7 +54,7 @@ const makeAddAccount = (): AddAccount => {
 
 const makeValidation = (): Validation => {
   class ValidationStub implements Validation {
-    async validate(): Promise<Error> {
+    validate(): Error {
       return null;
     }
   }
@@ -253,5 +253,20 @@ describe('SignUp Controller', () => {
 
     await sut.handle(httpRequest);
     expect(validateSpy).toHaveBeenCalledWith(httpRequest.body);
+  });
+
+  it('should return 400 if Validation return an error', async () => {
+    const { sut, validationStub } = makeSut();
+
+    jest
+      .spyOn(validationStub, 'validate')
+      .mockReturnValueOnce(new MissingParamError('any_field'));
+
+    const httpRequest = makeFakeHttpRequest();
+
+    const httpResponse = await sut.handle(httpRequest);
+    expect(httpResponse).toEqual(
+      badRequest(new MissingParamError('any_field')),
+    );
   });
 });

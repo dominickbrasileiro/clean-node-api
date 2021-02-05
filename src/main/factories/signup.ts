@@ -4,13 +4,10 @@ import { AccountMongoRepository } from '../../infra/database/mongodb/account-rep
 import { LogMongoRepository } from '../../infra/database/mongodb/log-repository/log';
 import { SignUpController } from '../../presentation/controllers/signup/signup';
 import { Controller } from '../../presentation/protocols';
-import { EmailValidatorAdapter } from '../../utils/email-validator-adapter';
 import { LogControllerDecorator } from '../decorators/log';
 import { makeSignUpValidation } from './signup-validation';
 
 export const makeSignUpController = (): Controller => {
-  const emailValidatorAdapter = new EmailValidatorAdapter();
-
   const encrypter = new BcryptAdapter(12);
 
   const accountMongoRepository = new AccountMongoRepository();
@@ -19,7 +16,6 @@ export const makeSignUpController = (): Controller => {
   const dbAddAccount = new DbAddAccount(encrypter, accountMongoRepository);
 
   const signUpController = new SignUpController(
-    emailValidatorAdapter,
     dbAddAccount,
     makeSignUpValidation(),
   );

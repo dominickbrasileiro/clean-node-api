@@ -59,10 +59,10 @@ describe('Login Controller', () => {
 
     await sut.handle(httpRequest);
 
-    expect(isValidSpy).toHaveBeenCalledWith(
-      'any_email@example.com',
-      'any_password',
-    );
+    expect(isValidSpy).toHaveBeenCalledWith({
+      email: 'any_email@example.com',
+      password: 'any_password',
+    });
   });
 
   it('should return 401 if invalid credentials are provided', async () => {

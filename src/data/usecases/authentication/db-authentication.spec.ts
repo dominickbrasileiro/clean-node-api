@@ -126,4 +126,18 @@ describe('DbAuthentication UseCase', () => {
 
     await expect(sut.auth(credentials)).rejects.toThrow();
   });
+
+  it('should return null if HashComparer returns false', async () => {
+    const { sut, hashComparerStub } = makeSut();
+
+    jest
+      .spyOn(hashComparerStub, 'compare')
+      .mockImplementationOnce(async () => false);
+
+    const credentials = makeFakeCredentials();
+
+    const accessToken = await sut.auth(credentials);
+
+    expect(accessToken).toBeNull();
+  });
 });

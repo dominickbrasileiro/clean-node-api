@@ -33,26 +33,26 @@ export class DbAuthentication implements Authentication {
       credentials.email,
     );
 
-    if (account) {
-      const passwordMatch = await this.hashComparer.compare(
-        credentials.password,
-        account.password,
-      );
-
-      if (!passwordMatch) {
-        return null;
-      }
-
-      const accessToken = await this.tokenGenerator.generate(account.id);
-
-      await this.updateAccessTokenRepository.updateAccessToken(
-        account.id,
-        accessToken,
-      );
-
-      return accessToken;
+    if (!account) {
+      return null;
     }
 
-    return null;
+    const passwordMatch = await this.hashComparer.compare(
+      credentials.password,
+      account.password,
+    );
+
+    if (!passwordMatch) {
+      return null;
+    }
+
+    const accessToken = await this.tokenGenerator.generate(account.id);
+
+    await this.updateAccessTokenRepository.updateAccessToken(
+      account.id,
+      accessToken,
+    );
+
+    return accessToken;
   }
 }

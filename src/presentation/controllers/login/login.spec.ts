@@ -6,7 +6,7 @@ import {
   ok,
   serverError,
   unauthorized,
-} from '../../helpers/http-helper';
+} from '../../helpers/http/http-helper';
 
 const makeFakeHttpRequest = (): HttpRequest => ({
   body: {

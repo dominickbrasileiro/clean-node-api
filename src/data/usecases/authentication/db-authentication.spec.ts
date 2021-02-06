@@ -90,7 +90,7 @@ describe('DbAuthentication UseCase', () => {
     expect(loadSpy).toHaveBeenCalledWith(credentials.email);
   });
 
-  it('should throw if LoadAccountByEmailRepository throw', async () => {
+  it('should throw if LoadAccountByEmailRepository throws', async () => {
     const { sut, loadAccountByEmailRepository } = makeSut();
 
     jest
@@ -133,7 +133,7 @@ describe('DbAuthentication UseCase', () => {
     );
   });
 
-  it('should throw if HashComparer throw', async () => {
+  it('should throw if HashComparer throws', async () => {
     const { sut, hashComparerStub } = makeSut();
 
     jest
@@ -171,5 +171,19 @@ describe('DbAuthentication UseCase', () => {
     await sut.auth(credentials);
 
     expect(generateSpy).toHaveBeenCalledWith('any_id');
+  });
+
+  it('should throw if TokenGenerator throws', async () => {
+    const { sut, tokenGeneratorStub } = makeSut();
+
+    jest
+      .spyOn(tokenGeneratorStub, 'generate')
+      .mockReturnValueOnce(
+        new Promise((resolve, reject) => reject(new Error())),
+      );
+
+    const credentials = makeFakeCredentials();
+
+    await expect(sut.auth(credentials)).rejects.toThrow();
   });
 });

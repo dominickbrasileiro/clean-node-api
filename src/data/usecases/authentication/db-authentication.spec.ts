@@ -3,6 +3,7 @@ import { AuthenticationModel } from '../../../domain/usecases/authentication';
 import { HashComparer } from '../../protocols/criptography/hash-comparer';
 import { TokenGenerator } from '../../protocols/criptography/token-generator';
 import { LoadAccountByEmailRepository } from '../../protocols/database/load-account-by-email-repository';
+import { UpdateAccessTokenRepository } from '../../protocols/database/update-access-token-repository';
 import { DbAuthentication } from './db-authentication';
 
 const makeFakeAccount = (): AccountModel => ({
@@ -21,6 +22,16 @@ const makeLoadAccountByEmailRepository = (): LoadAccountByEmailRepository => {
   }
 
   return new LoadAccountByEmailRepositoryStub();
+};
+
+const makeUpdateAccessTokenRepository = (): UpdateAccessTokenRepository => {
+  class UpdateAccessTokenRepositoryStub implements UpdateAccessTokenRepository {
+    async updateAccessToken(): Promise<void> {
+      return null;
+    }
+  }
+
+  return new UpdateAccessTokenRepositoryStub();
 };
 
 const makeHashComparer = (): HashComparer => {
@@ -51,6 +62,7 @@ const makeFakeCredentials = (): AuthenticationModel => ({
 interface SutTypes {
   sut: DbAuthentication;
   loadAccountByEmailRepository: LoadAccountByEmailRepository;
+  updateAccessTokenRepositoryStub: UpdateAccessTokenRepository;
   hashComparerStub: HashComparer;
   tokenGeneratorStub: TokenGenerator;
 }
@@ -59,9 +71,11 @@ const makeSut = (): SutTypes => {
   const loadAccountByEmailRepository = makeLoadAccountByEmailRepository();
   const hashComparerStub = makeHashComparer();
   const tokenGeneratorStub = makeTokenGenerator();
+  const updateAccessTokenRepositoryStub = makeUpdateAccessTokenRepository();
 
   const sut = new DbAuthentication(
     loadAccountByEmailRepository,
+    updateAccessTokenRepositoryStub,
     hashComparerStub,
     tokenGeneratorStub,
   );
@@ -71,6 +85,7 @@ const makeSut = (): SutTypes => {
     loadAccountByEmailRepository,
     hashComparerStub,
     tokenGeneratorStub,
+    updateAccessTokenRepositoryStub,
   };
 };
 
@@ -195,5 +210,20 @@ describe('DbAuthentication UseCase', () => {
     const accessToken = await sut.auth(credentials);
 
     expect(accessToken).toBe('any_token');
+  });
+
+  it('should call UpdateAccessTokenRepository with correct values', async () => {
+    const { sut, updateAccessTokenRepositoryStub } = makeSut();
+
+    const updateSpy = jest.spyOn(
+      updateAccessTokenRepositoryStub,
+      'updateAccessToken',
+    );
+
+    const credentials = makeFakeCredentials();
+
+    await sut.auth(credentials);
+
+    expect(updateSpy).toHaveBeenCalledWith('any_id', 'any_token');
   });
 });

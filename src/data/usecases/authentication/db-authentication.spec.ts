@@ -1,6 +1,7 @@
 import { AccountModel } from '../../../domain/models/account';
 import { AuthenticationModel } from '../../../domain/usecases/authentication';
 import { HashComparer } from '../../protocols/criptography/hash-comparer';
+import { TokenGenerator } from '../../protocols/criptography/token-generator';
 import { LoadAccountByEmailRepository } from '../../protocols/database/load-account-by-email-repository';
 import { DbAuthentication } from './db-authentication';
 
@@ -32,6 +33,16 @@ const makeHashComparer = (): HashComparer => {
   return new HashComparerStub();
 };
 
+const makeTokenGenerator = (): TokenGenerator => {
+  class TokenGeneratorStub implements TokenGenerator {
+    async generate(): Promise<string> {
+      return 'token';
+    }
+  }
+
+  return new TokenGeneratorStub();
+};
+
 const makeFakeCredentials = (): AuthenticationModel => ({
   email: 'any_email@example.com',
   password: 'any_password',
@@ -41,17 +52,26 @@ interface SutTypes {
   sut: DbAuthentication;
   loadAccountByEmailRepository: LoadAccountByEmailRepository;
   hashComparerStub: HashComparer;
+  tokenGeneratorStub: TokenGenerator;
 }
 
 const makeSut = (): SutTypes => {
   const loadAccountByEmailRepository = makeLoadAccountByEmailRepository();
   const hashComparerStub = makeHashComparer();
+  const tokenGeneratorStub = makeTokenGenerator();
+
   const sut = new DbAuthentication(
     loadAccountByEmailRepository,
     hashComparerStub,
+    tokenGeneratorStub,
   );
 
-  return { sut, loadAccountByEmailRepository, hashComparerStub };
+  return {
+    sut,
+    loadAccountByEmailRepository,
+    hashComparerStub,
+    tokenGeneratorStub,
+  };
 };
 
 describe('DbAuthentication UseCase', () => {
@@ -139,5 +159,17 @@ describe('DbAuthentication UseCase', () => {
     const accessToken = await sut.auth(credentials);
 
     expect(accessToken).toBeNull();
+  });
+
+  it('should call TokenGenerator with correct id', async () => {
+    const { sut, tokenGeneratorStub } = makeSut();
+
+    const generateSpy = jest.spyOn(tokenGeneratorStub, 'generate');
+
+    const credentials = makeFakeCredentials();
+
+    await sut.auth(credentials);
+
+    expect(generateSpy).toHaveBeenCalledWith('any_id');
   });
 });

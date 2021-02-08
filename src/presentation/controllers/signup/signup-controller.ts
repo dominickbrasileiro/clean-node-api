@@ -5,7 +5,7 @@ import {
   HttpRequest,
   HttpResponse,
   AddAccount,
-} from './signup-protocols';
+} from './signup-protocols-controller';
 import { badRequest, ok, serverError } from '../../helpers/http/http-helper';
 import { Validation } from '../../protocols/validation';
 

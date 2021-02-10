@@ -10,10 +10,10 @@ services:
       - "27017:27017"
   api:
     container_name: api-container
-    build: .
-    image: clean-node-api
+    image: node:14
     restart: always
-    command: yarn debug
+    working_dir: /usr/src/clean-node-api
+    command: bash -c "yarn --prod && yarn debug"
     volumes:
       - ./package.json:/usr/src/clean-node-api/package.json
       - ./dist:/usr/src/clean-node-api/dist

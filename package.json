@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "build": "rimraf dist && tsc",
-    "dev": "sucrase-node src/main/server.ts",
+    "up": "yarn build && docker-compose up -d",
+    "down": "docker-compose down",
     "prod": "pm2 start dist/main/server.js",
     "start": "node dist/main/server.js",
     "test": "jest --passWithNoTests --silent --noStackTrace --runInBand",
@@ -39,7 +40,6 @@
     "lint-staged": "^10.5.3",
     "prettier": "^2.2.1",
     "rimraf": "^3.0.2",
-    "sucrase": "^3.17.1",
     "supertest": "^6.1.1",
     "ts-jest": "^26.4.4",
     "typescript": "^4.1.3"

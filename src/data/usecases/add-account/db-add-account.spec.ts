@@ -3,6 +3,7 @@ import {
   AddAccountModel,
   AccountModel,
   AddAccountRepository,
+  LoadAccountByEmailRepository,
 } from './db-add-account-protocols';
 import { DbAddAccount } from './db-add-account';
 
@@ -44,20 +45,43 @@ const makeAddAccountRepository = (): AddAccountRepository => {
 
   return addAccountRepositoryStub;
 };
+
+const makeLoadAccountByEmailRepository = (): LoadAccountByEmailRepository => {
+  class LoadAccountByEmailRepositoryStub
+    implements LoadAccountByEmailRepository {
+    async loadAccountByEmail(): Promise<AccountModel> {
+      return makeFakeAccount();
+    }
+  }
+
+  return new LoadAccountByEmailRepositoryStub();
+};
+
 interface SutTypes {
   sut: DbAddAccount;
   hasherStub: Hasher;
   addAccountRepositoryStub: AddAccountRepository;
+  loadAccountByEmailRepository: LoadAccountByEmailRepository;
 }
 
 const makeSut = (): SutTypes => {
   const hasherStub = makeHasher();
 
   const addAccountRepositoryStub = makeAddAccountRepository();
+  const loadAccountByEmailRepository = makeLoadAccountByEmailRepository();
 
-  const sut = new DbAddAccount(hasherStub, addAccountRepositoryStub);
+  const sut = new DbAddAccount(
+    hasherStub,
+    addAccountRepositoryStub,
+    loadAccountByEmailRepository,
+  );
 
-  return { sut, hasherStub, addAccountRepositoryStub };
+  return {
+    sut,
+    hasherStub,
+    addAccountRepositoryStub,
+    loadAccountByEmailRepository,
+  };
 };
 
 describe('DbAddAccount Usecase', () => {
@@ -125,5 +149,20 @@ describe('DbAddAccount Usecase', () => {
     const account = await sut.add(accountData);
 
     expect(account).toEqual(makeFakeAccount());
+  });
+
+  it('should call LoadAccountByEmailRepository with correct e-mail', async () => {
+    const { sut, loadAccountByEmailRepository } = makeSut();
+
+    const loadSpy = jest.spyOn(
+      loadAccountByEmailRepository,
+      'loadAccountByEmail',
+    );
+
+    const accountData = makeFakeAccountData();
+
+    await sut.add(accountData);
+
+    expect(loadSpy).toHaveBeenCalledWith(accountData.email);
   });
 });
